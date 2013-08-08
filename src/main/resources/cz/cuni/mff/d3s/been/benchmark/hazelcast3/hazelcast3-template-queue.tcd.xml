@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<taskContextDescriptor xmlns="http://been.d3s.mff.cuni.cz/task-context-descriptor"
+					   xmlns:td="http://been.d3s.mff.cuni.cz/task-descriptor"
+					   name="hazelcast3-queue-context">
+
+	<contextDescription>Hazelcast 3 - distributed queue test</contextDescription>
+
+	<properties>
+		<property name="hazelcast.jar">hazelcast-3.0-SNAPSHOT.jar</property>
+		<property name="hazelcast.client.jar">hazelcast-client-3.0-SNAPSHOT.jar</property>
+		<property name="entity.kind">result</property>
+		<property name="entity.group">hazelcast3</property>
+		<property name="hazelcast.group">benchmark</property>
+		<property name="hazelcast.password">benchmark-pass</property>
+		<property name="hazelcast.queue.name">benchmark-queue</property>
+
+	</properties>
+
+	<templates>
+		<template name="client">
+			<td:taskDescriptor
+					groupId="cz.cuni.mff.d3s.been.benchmark" bpkId="hazelcast3"
+					version="0.1-SNAPSHOT" name="client" type="task" exclusive="exclusive">
+				<td:java>
+
+					<td:mainClass>cz.cuni.mff.d3s.been.benchmark.hazelcast3.client.ClientTask</td:mainClass>
+				</td:java>
+			</td:taskDescriptor>
+		</template>
+
+		<template name="node">
+			<td:taskDescriptor
+					groupId="cz.cuni.mff.d3s.been.benchmark" bpkId="hazelcast3"
+					version="0.1-SNAPSHOT" name="node" type="task" exclusive="exclusive">
+				<td:java>
+					<td:mainClass>cz.cuni.mff.d3s.been.benchmark.hazelcast3.node.NodeTask</td:mainClass>
+				</td:java>
+			</td:taskDescriptor>
+		</template>
+
+		<template name="evaluator">
+			<td:taskDescriptor
+					groupId="cz.cuni.mff.d3s.been.benchmark" bpkId="hazelcast3"
+					version="0.1-SNAPSHOT" name="evaluator" type="task">
+				<td:java>
+					<td:mainClass>cz.cuni.mff.d3s.been.benchmark.hazelcast3.evaluator.EvaluatorTask</td:mainClass>
+				</td:java>
+			</td:taskDescriptor>
+		</template>
+
+		<template name="builder">
+			<td:taskDescriptor
+					groupId="cz.cuni.mff.d3s.been.benchmark" bpkId="hazelcast3"
+					version="0.1-SNAPSHOT" name="builder" type="task">
+
+				<td:properties>
+					<td:property name="cmd.mvn">mvn -q package</td:property>
+					<td:property name="cmd.git">git clone -b %s %s</td:property>
+					<td:property name="hazelcast.dir">hazelcast</td:property>
+				</td:properties>
+				<td:java>
+
+					<td:mainClass>cz.cuni.mff.d3s.been.benchmark.hazelcast3.builder.BuilderTask</td:mainClass>
+				</td:java>
+			</td:taskDescriptor>
+		</template>
+
+
+	</templates>
+
+</taskContextDescriptor>
