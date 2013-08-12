@@ -90,7 +90,10 @@ public class EvaluatorTask extends Evaluator {
 				break;
 			}
 
-			BufferedImage image = generateChart(grouped, runToCommit, yCaption);
+			int width = props.getInteger(BenchmarkProperty.EVALUATOR_WIDTH_SIZE);
+			int height = props.getInteger(BenchmarkProperty.EVALUATOR_HEIGHT_SIZE);
+
+			BufferedImage image = generateChart(grouped, runToCommit, yCaption, width, height);
 
 			ImageIO.write(image, "png", new File("out.png"));
 
@@ -112,7 +115,8 @@ public class EvaluatorTask extends Evaluator {
 
 	}
 
-	public BufferedImage generateChart(Map<String, List<Double>> data, Map<Integer, String> runToCommit, String yCaption) {
+	public BufferedImage generateChart(Map<String, List<Double>> data, Map<Integer, String> runToCommit, String yCaption,
+			int width, int height) {
 		// create dataset
 		YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 		YIntervalSeries s1 = new YIntervalSeries(yCaption);
@@ -161,13 +165,13 @@ public class EvaluatorTask extends Evaluator {
 		chart.setBackgroundPaint(Color.white);
 
 		// create output image
-		BufferedImage image = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics = image.createGraphics();
 		graphics.setBackground(Color.white);
-		graphics.clearRect(0, 0, 800, 600);
+		graphics.clearRect(0, 0, width, height);
 
 		// render
-		chart.draw(graphics, new Rectangle2D.Double(0, 0, 800, 600));
+		chart.draw(graphics, new Rectangle2D.Double(0, 0, width, height));
 
 		return image;
 	}

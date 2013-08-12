@@ -6,6 +6,8 @@
 	<properties>
 		<property name="task.log.level">DEBUG</property>
 		<property name="evaluator.benchmark.id"/>
+		<property name="evaluator.graph.size.width">800</property>
+		<property name="evaluator.graph.size.height">600</property>
 	</properties>
 
 	<java>

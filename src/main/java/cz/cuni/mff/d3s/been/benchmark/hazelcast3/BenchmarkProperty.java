@@ -68,6 +68,8 @@ public enum BenchmarkProperty implements PropertyProvider {
 
 	EVALUATOR_BENCHMARK_ID("evaluator.benchmark.id", "", false),
 	EVALUATOR_RUN_AFTER("evaluator.run.after", 10, false),
+	EVALUATOR_WIDTH_SIZE("evaluator.graph.size.width", 800, true),
+	EVALUATOR_HEIGHT_SIZE("evaluator.graph.size.height", 600, true),
 
 	BENCHMARK_CLIENTS_EXCLUSIVE("benchmark.clients.exclusive", true, true),
 	BENCHMARK_NODES_EXCLUSIVE("benchmark.nodes.exclusive", true, true),
