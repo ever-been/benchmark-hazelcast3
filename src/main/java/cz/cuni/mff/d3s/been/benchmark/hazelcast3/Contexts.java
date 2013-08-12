@@ -1,13 +1,14 @@
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3;
 
+import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
+
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.TaskPropertyReader;
 import cz.cuni.mff.d3s.been.benchmarkapi.BenchmarkException;
 import cz.cuni.mff.d3s.been.benchmarkapi.ContextBuilder;
 import cz.cuni.mff.d3s.been.core.task.Property;
 import cz.cuni.mff.d3s.been.core.task.Task;
 import cz.cuni.mff.d3s.been.core.task.TaskContextDescriptor;
-
-import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
+import cz.cuni.mff.d3s.been.core.task.TaskExclusivity;
 
 /**
  * @author Martin Sixta
@@ -25,16 +26,13 @@ final class Contexts {
 	private static final String NODE_TASK_NAME_TEMPLATE = "node%02d";
 	private static final String CLIENT_TASK_NAME_TEMPLATE = "client%02d";
 
-
 	static TaskContextDescriptor create(int run, String commitSha, TaskPropertyReader props) throws BenchmarkException {
 		final int clientCnt = props.getInteger(CLIENT_COUNT);
 		final int nodeCnt = props.getInteger(NODE_COUNT);
 		final String contextName = String.format("Hazelcast benchmark [run: %d, commit: %s]", run, commitSha);
 
-
 		ContextBuilder builder = ContextBuilder.createFromResource(Contexts.class, CONTEXT_TEMPLATE_RESOURCE);
 		builder.setName(contextName);
-
 
 		// set properties
 		for (BenchmarkProperty benchmarkProperty : BenchmarkProperty.values()) {
@@ -52,9 +50,10 @@ final class Contexts {
 		builder.setSelector(NODE_TEMPLATE, props.getString(SELECTOR_NODE));
 		builder.setSelector(CLIENT_TEMPLATE, props.getString(SELECTOR_CLIENT));
 
-
 		// add builder task
 		builder.addTask(BUILDER_TASK_NAME, BUILDER_TEMPLATE);
+
+		builder.setExclusivity(CLIENT_TEMPLATE, getExclusivityFor(props, BENCHMARK_CLIENTS_EXCLUSIVE));
 
 		// create appropriate number of clients
 		for (int i = 1; i <= clientCnt; ++i) {
@@ -63,7 +62,9 @@ final class Contexts {
 			task.getProperties().getProperty().add(new Property().withName(CLIENT_ID.getPropertyName()).withValue(clientId));
 		}
 
-		// create appropriate number of clients
+		builder.setExclusivity(NODE_TEMPLATE, getExclusivityFor(props, BENCHMARK_NODES_EXCLUSIVE));
+
+		// create appropriate number of nodes
 		for (int i = 1; i <= nodeCnt; ++i) {
 			String nodeId = String.format(NODE_TASK_NAME_TEMPLATE, i);
 
@@ -72,10 +73,8 @@ final class Contexts {
 
 		}
 
-
 		return builder.build();
 	}
-
 
 	static TaskContextDescriptor createEvaluatorContext(TaskPropertyReader props) throws BenchmarkException {
 
@@ -88,5 +87,12 @@ final class Contexts {
 		return builder.build();
 	}
 
+	private static TaskExclusivity getExclusivityFor(final TaskPropertyReader props, final BenchmarkProperty property) {
+		if (props.getBoolean(property)) {
+			return TaskExclusivity.EXCLUSIVE;
+		} else {
+			return TaskExclusivity.NON_EXCLUSIVE;
+		}
+	}
 
 }

@@ -1,15 +1,18 @@
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3.evaluator;
 
-import cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty;
-import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.TaskPropertyReader;
-import cz.cuni.mff.d3s.been.benchmark.hazelcast3.result.NodeResult;
-import cz.cuni.mff.d3s.been.core.persistence.EntityID;
-import cz.cuni.mff.d3s.been.evaluators.EvaluatorResult;
-import cz.cuni.mff.d3s.been.persistence.DAOException;
-import cz.cuni.mff.d3s.been.persistence.Query;
-import cz.cuni.mff.d3s.been.persistence.QueryBuilder;
-import cz.cuni.mff.d3s.been.taskapi.Evaluator;
-import cz.cuni.mff.d3s.been.taskapi.TaskException;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jfree.chart.JFreeChart;
@@ -23,17 +26,16 @@ import org.jfree.data.xy.YIntervalSeriesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty;
+import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.TaskPropertyReader;
+import cz.cuni.mff.d3s.been.benchmark.hazelcast3.result.NodeResult;
+import cz.cuni.mff.d3s.been.core.persistence.EntityID;
+import cz.cuni.mff.d3s.been.evaluators.EvaluatorResult;
+import cz.cuni.mff.d3s.been.persistence.DAOException;
+import cz.cuni.mff.d3s.been.persistence.Query;
+import cz.cuni.mff.d3s.been.persistence.QueryBuilder;
+import cz.cuni.mff.d3s.been.taskapi.Evaluator;
+import cz.cuni.mff.d3s.been.taskapi.TaskException;
 
 /**
  * @author Martin Sixta
@@ -41,11 +43,9 @@ import java.util.concurrent.TimeUnit;
 public class EvaluatorTask extends Evaluator {
 	private static final Logger log = LoggerFactory.getLogger(EvaluatorTask.class);
 
-
 	@Override
 	public EvaluatorResult evaluate() throws DAOException, TaskException {
 		TaskPropertyReader props = new TaskPropertyReader(createPropertyReader());
-
 
 		final String kind = props.getString(BenchmarkProperty.ENTITY_KIND);
 		final String group = props.getString(BenchmarkProperty.ENTITY_GROUP);
@@ -61,10 +61,8 @@ public class EvaluatorTask extends Evaluator {
 				benchmarkId = getBenchmarkId();
 			}
 
-
 			Query query = new QueryBuilder().on(eid).with("benchmarkId", benchmarkId).with("type", "NODE").fetch();
 			final Collection<NodeResult> nodeResults = results.query(query, NodeResult.class);
-
 
 			Map<String, List<Double>> grouped = new HashMap<>();
 			Map<Integer, String> runToCommit = new TreeMap<>();
@@ -80,8 +78,19 @@ public class EvaluatorTask extends Evaluator {
 				runToCommit.put(nodeResult.getRun(), commit);
 			}
 
+			String yCaption = "time (ms)";
 
-			BufferedImage image = generateChart(grouped, runToCommit);
+			for (NodeResult r : nodeResults) {
+				yCaption = String.format(
+						"Nodes %d, Clients %s, Msgs/client: %s, Msg Size %d",
+						r.getNodes(),
+						r.getClients(),
+						r.getMessages(),
+						r.getMsgSize());
+				break;
+			}
+
+			BufferedImage image = generateChart(grouped, runToCommit, yCaption);
 
 			ImageIO.write(image, "png", new File("out.png"));
 
@@ -93,7 +102,6 @@ public class EvaluatorTask extends Evaluator {
 			er.setData(Files.readAllBytes(Paths.get("out.png")));
 			er.setId(getId());
 
-
 			return er;
 
 		} catch (IllegalStateException e) {
@@ -102,14 +110,12 @@ public class EvaluatorTask extends Evaluator {
 			throw new TaskException("Cannot generate results plot!", e);
 		}
 
-
 	}
 
-
-	public BufferedImage generateChart(Map<String, List<Double>> data, Map<Integer, String> runToCommit) {
+	public BufferedImage generateChart(Map<String, List<Double>> data, Map<Integer, String> runToCommit, String yCaption) {
 		// create dataset
 		YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
-		YIntervalSeries s1 = new YIntervalSeries("time (ms)");
+		YIntervalSeries s1 = new YIntervalSeries(yCaption);
 
 		int i = 0;
 
@@ -139,7 +145,7 @@ public class EvaluatorTask extends Evaluator {
 		}
 		ValueAxis xAxis = new SymbolAxis("Commits", stringsArray);
 
-		NumberAxis yAxis = new NumberAxis("Connection time (ms)");
+		NumberAxis yAxis = new NumberAxis("Cluster processing time (ms)");
 		yAxis.setAutoRangeStickyZero(false);
 		XYErrorRenderer renderer = new XYErrorRenderer();
 		renderer.setBaseLinesVisible(true);
@@ -181,7 +187,6 @@ public class EvaluatorTask extends Evaluator {
 
 		double[] values = toPrimitiveArray(data);
 
-
 		// Get a DescriptiveStatistics instance
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 
@@ -190,7 +195,6 @@ public class EvaluatorTask extends Evaluator {
 			stats.addValue(value);
 		}
 		return stats;
-
 
 	}
 }

@@ -2,11 +2,10 @@
 <taskDescriptor xmlns="http://been.d3s.mff.cuni.cz/task-descriptor"
 				groupId="cz.cuni.mff.d3s.been.benchmark" bpkId="hazelcast3"
 				version="0.1-SNAPSHOT"
-				name="hazelcast3-benchmark" type="task">
+				name="hazelcast3-evaluator" type="task">
 	<properties>
 		<property name="task.log.level">DEBUG</property>
 		<property name="evaluator.benchmark.id"/>
-
 	</properties>
 
 	<java>

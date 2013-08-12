@@ -10,8 +10,8 @@ public class ClientResult extends HazelcastResult {
 		// makes Jackson happy
 	}
 
-	public ClientResult(String id, String commit, int run, long time, long sent) {
-		super("CLIENT", commit, run, id, time);
+	public ClientResult(long sent) {
+
 		this.sent = sent;
 	}
 

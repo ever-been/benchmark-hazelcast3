@@ -4,8 +4,6 @@
 				version="0.1-SNAPSHOT"
 				name="hazelcast3-benchmark" type="benchmark">
 	<properties>
-		<!--<property name="git.commit.start"/>-->
-		<!--<property name="git.commit.end"/>-->
 		<property name="git.commit.list.url"/>
 		<property name="git.commit.count">10</property>
 		<property name="github.branch">3.0</property>
@@ -18,12 +16,14 @@
 		<property name="hazelcast.client.count">3</property>
 		<property name="hazelcast.node.count">2</property>
 		<property name="hazelcast.node.config.url"/>
-		<property name="hazelcast.node.config"/>
+		<!--<property name="hazelcast.node.config"/>-->
 		<!--<property name="hazelcast.client.config"/>-->
 		<property name="hazelcast.msg.size">64</property>
 		<property name="hazelcast.client.msg.count">10000</property>
 
-		<property name="benchmark.type">QUEUE</property>
+		<!--<property name="benchmark.type">QUEUE</property>-->
+		<property name="benchmark.clients.exclusive">true</property>
+		<property name="benchmark.nodes.exclusive">true</property>
 		<property name="node.check.msg">false</property>
 
 		<property name="selector.node"/>

@@ -44,11 +44,9 @@ public enum BenchmarkProperty implements PropertyProvider {
 	SELECTOR_BUILDER("selector.builder", "", false),
 	SELECTOR_EVALUATOR("selector.evaluator", "", false),
 
-
 	NODE_ID("node.id", "", false),
 	CLIENT_ID("client.id", "", false),
 	RUN("run", -1, false),
-
 
 	GITHUB_BRANCH("github.branch", "3.0", true),
 	GITHUB_OWNER("github.owner", "hazelcast", true),
@@ -59,27 +57,26 @@ public enum BenchmarkProperty implements PropertyProvider {
 	COMMIT_LIST_URL("git.commit.list.url", "", false),
 	COMMIT_START("git.commit.start", "", false),
 	COMMIT_END("git.commit.end", "", false),
-	COMMIT_COUNT("git.commit.count", 99, false),
+	COMMIT_COUNT("git.commit.count", 10, false),
 	COMMIT_CURRENT("git.commit.current", "", true),
 
-	CLIENT_COUNT("hazelcast.client.count", 1, true),
+	CLIENT_COUNT("hazelcast.client.count", 2, true),
 	NODE_COUNT("hazelcast.node.count", 2, true),
 	NODE_LATCH("benchmark.node.latch", 0, false),
 
 	NODE_CHECK_MESSAGE("node.check.msg", false, false),
 
 	EVALUATOR_BENCHMARK_ID("evaluator.benchmark.id", "", false),
-	EVALUATOR_RUN_AFTER("evaluator.run.after", 5, false),
+	EVALUATOR_RUN_AFTER("evaluator.run.after", 10, false),
 
-
+	BENCHMARK_CLIENTS_EXCLUSIVE("benchmark.clients.exclusive", true, true),
+	BENCHMARK_NODES_EXCLUSIVE("benchmark.nodes.exclusive", true, true),
 	BENCHMARK_TYPE("benchmark.type", "QUEUE", false),
 	LOG_LEVEL("task.log.level", "DEBUG", true);
-
 
 	private final String propertyName;
 	private final boolean isContextProperty;
 	private final Object defaultValue;
-
 
 	BenchmarkProperty(String propertyName, Object defaultValue, boolean isContextProperty) {
 		this.propertyName = propertyName;
@@ -100,6 +97,5 @@ public enum BenchmarkProperty implements PropertyProvider {
 	boolean isContextProperty() {
 		return isContextProperty;
 	}
-
 
 }

@@ -17,6 +17,15 @@
  */
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3.builder;
 
+import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.ProcessUtils;
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.SkeletalTask;
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.result.Results;
@@ -25,14 +34,6 @@ import cz.cuni.mff.d3s.been.persistence.DAOException;
 import cz.cuni.mff.d3s.been.results.Result;
 import cz.cuni.mff.d3s.been.taskapi.CheckpointController;
 import cz.cuni.mff.d3s.been.taskapi.TaskException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
 
 /**
  * @author Martin Sixta
@@ -44,12 +45,10 @@ public class BuilderTask extends SkeletalTask {
 	 */
 	private static final Logger log = LoggerFactory.getLogger(BuilderTask.class);
 
-
 	/**
 	 * GitHub url template - needs owner and repository
 	 */
 	private static final String GITHUB_URL_TEMPLATE = "https://github.com/%s/%s.git";
-
 
 	@Override
 	public void run(String[] strings) throws TaskException, DAOException, MessagingException {
@@ -64,9 +63,7 @@ public class BuilderTask extends SkeletalTask {
 		final String mvnCmd = getProperty("cmd.mvn");
 		final String hazelcastDir = getProperty("hazelcast.dir");
 
-
 		log.debug("Going to build commit {}", commit);
-
 
 		// --------------------------------------------------------------------
 		// GIT
@@ -77,25 +74,21 @@ public class BuilderTask extends SkeletalTask {
 
 		int gitExitValue = ProcessUtils.run(gitCmd, ".", false, false);
 
-
 		if (gitExitValue != 0) {
 			String msg = String.format("Cannot clone branch '%s' from repository  '%s'", branch, repository);
 			throw new TaskException(msg);
 		}
 
-
 		String gitCheckoutCmd = String.format("git checkout %s", commit);
 
 		log.debug("Checking out with command: {}", gitCheckoutCmd);
 
-
-		int gitCheckoutExitValue = ProcessUtils.run(gitCheckoutCmd, hazelcastDir);
+		int gitCheckoutExitValue = ProcessUtils.run(gitCheckoutCmd, hazelcastDir, false, false);
 
 		if (gitCheckoutExitValue != 0) {
 			String msg = String.format("Cannot checkout commit '%s'", commit);
 			throw new TaskException(msg);
 		}
-
 
 		// --------------------------------------------------------------------
 		// MVN
@@ -103,12 +96,10 @@ public class BuilderTask extends SkeletalTask {
 		log.info("Building with command: {}", mvnCmd);
 		int mvnExitValue = ProcessUtils.run(mvnCmd, hazelcastDir, false, false);
 
-
 		if (mvnExitValue != 0) {
 			String msg = String.format("Error running '%s'", mvnCmd);
 			throw new TaskException(msg);
 		}
-
 
 		// --------------------------------------------------------------------
 		// RESULTS
@@ -118,10 +109,14 @@ public class BuilderTask extends SkeletalTask {
 		Path nodeJarPath = Paths.get(hazelcastDir, "hazelcast", "target", hazelcastJar);
 		Path clientJarPath = Paths.get(hazelcastDir, "hazelcast-client", "target", hazelcastClientJar);
 
-
 		uploadJar(nodeJarPath);
 		uploadJar(clientJarPath);
 
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+
+		}
 
 		int nodes = props.getInteger(NODE_COUNT);
 
@@ -144,7 +139,6 @@ public class BuilderTask extends SkeletalTask {
 		}
 
 	}
-
 
 	private String getGitHubUrl() {
 		String owner = props.getString(GITHUB_OWNER);
