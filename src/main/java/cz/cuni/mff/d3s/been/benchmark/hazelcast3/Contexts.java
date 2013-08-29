@@ -53,7 +53,7 @@ final class Contexts {
 		// add builder task
 		builder.addTask(BUILDER_TASK_NAME, BUILDER_TEMPLATE);
 
-		builder.setExclusivity(CLIENT_TEMPLATE, getExclusivityFor(props, BENCHMARK_CLIENTS_EXCLUSIVE));
+		builder.setExclusivity(CLIENT_TEMPLATE, getExclusivityFor(props, EXCLUSIVITY_CLIENTS));
 
 		// create appropriate number of clients
 		for (int i = 1; i <= clientCnt; ++i) {
@@ -62,7 +62,7 @@ final class Contexts {
 			task.getProperties().getProperty().add(new Property().withName(CLIENT_ID.getPropertyName()).withValue(clientId));
 		}
 
-		builder.setExclusivity(NODE_TEMPLATE, getExclusivityFor(props, BENCHMARK_NODES_EXCLUSIVE));
+		builder.setExclusivity(NODE_TEMPLATE, getExclusivityFor(props, EXCLUSIVITY_NODES));
 
 		// create appropriate number of nodes
 		for (int i = 1; i <= nodeCnt; ++i) {

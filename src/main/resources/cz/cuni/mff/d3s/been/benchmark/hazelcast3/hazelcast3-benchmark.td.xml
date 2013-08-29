@@ -3,33 +3,39 @@
 				groupId="cz.cuni.mff.d3s.been.benchmark" bpkId="hazelcast3"
 				version="0.1-SNAPSHOT"
 				name="hazelcast3-benchmark" type="benchmark">
+	<description>Benchmark of Hazelcast3</description>
 	<properties>
-		<property name="git.commit.list.url"/>
-		<property name="git.commit.count">10</property>
-		<property name="github.branch">3.0</property>
-		<property name="github.owner">hazelcast</property>
-		<property name="github.repository">hazelcast</property>
-		<property name="github.oauth.token"/>
+		<property name="git.commit.list.url"
+				  description="Url pointing to a list of commits to use. If no list is specified, the benchmark will try to get list of commits from GitHub"/>
+		<property name="git.commit.count" description="Number of first n commits to use">10</property>
+		<property name="github.owner" description="GitHub owner of the repository">hazelcast</property>
+		<property name="github.repository" description="GitHub repository to use">hazelcast</property>
+		<property name="github.branch" description="GitHub branch to use">maintenance-3.x</property>
+		<property name="github.oauth.token" description="GitHub OAuth token to use, if not commit url is specified"/>
 
-		<property name="task.log.level">DEBUG</property>
+		<property name="task.log.level" description="Task debug level">DEBUG</property>
 
-		<property name="hazelcast.client.count">3</property>
-		<property name="hazelcast.node.count">2</property>
-		<property name="hazelcast.node.config.url"/>
-		<!--<property name="hazelcast.node.config"/>-->
-		<!--<property name="hazelcast.client.config"/>-->
-		<property name="hazelcast.msg.size">64</property>
-		<property name="hazelcast.client.msg.count">10000</property>
+		<property name="hazelcast.client.count" description="How many clients should the benchmark spawn per context">
+			3
+		</property>
+		<property name="hazelcast.node.count" description="How many nodes should the benchmark spawn per context">2
+		</property>
+		<property name="hazelcast.node.config.url"
+				  description="Url with Hazelcast configuration to use, if none is specified default config will be used"/>
+		<property name="hazelcast.msg.size" description="Size of the message padding">64</property>
+		<property name="hazelcast.client.msg.count" description="How many messages each client will sent">10000
+		</property>
 
 		<!--<property name="benchmark.type">QUEUE</property>-->
-		<property name="benchmark.clients.exclusive">true</property>
-		<property name="benchmark.nodes.exclusive">true</property>
-		<property name="node.check.msg">false</property>
+		<property name="exclusivity.clients" description="Whether clients should run as exclusive tasks">true</property>
+		<property name="exclusivity.nodes" description="Whether nodes should run as exclusive tasks">true</property>
+		<property name="node.check.msg" description="Whether nodes should check checksum of received messages">false
+		</property>
 
-		<property name="selector.node"/>
-		<property name="selector.client"/>
-		<property name="selector.builder"/>
-		<property name="selector.evaluator"/>
+		<property name="selector.node" description="Where nodes should run"/>
+		<property name="selector.client" description="Where clients should run"/>
+		<property name="selector.builder" description="Where the builder task should run"/>
+		<property name="selector.evaluator" description="Where the evaluator task should run"/>
 
 	</properties>
 
