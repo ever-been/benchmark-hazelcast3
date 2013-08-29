@@ -10,9 +10,10 @@
 
 	<properties>
 		<!-- BEEN DEPENDENCIES -->
-		<been.api.version>3.0.0</been.api.version>
+		<been.api.version>3.0.0-SNAPSHOT</been.api.version>
+		<been-maven-plugin.version>1.0.0-SNAPSHOT</been-maven-plugin.version>
 
-		<hazelcast.version>3.0-RC1</hazelcast.version>
+		<hazelcast.version>3.0</hazelcast.version>
 
 		<!-- 3RD PARTY DEPENDENCIES -->
 		<maven-assembly-plugin.version>2.4</maven-assembly-plugin.version>
@@ -28,6 +29,8 @@
 		<github-api.version>1.43</github-api.version>
 		<jfreechart.version>1.0.13</jfreechart.version>
 		<commons-math3.version>3.2</commons-math3.version>
+		<commons-codec.version>1.8</commons-codec.version>
+		<eclipse-mylyn-github.version>2.1.5</eclipse-mylyn-github.version>
 
 		<!-- SOURCE LEVEL CONTROL -->
 		<java-source.version>1.7</java-source.version>
@@ -83,14 +86,14 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.8</version>
+			<version>${commons-codec.version}</version>
 		</dependency>
 
 
 		<dependency>
 			<groupId>org.eclipse.mylyn.github</groupId>
 			<artifactId>org.eclipse.egit.github.core</artifactId>
-			<version>2.1.5</version>
+			<version>${eclipse-mylyn-github.version}</version>
 		</dependency>
 
 		<dependency>
@@ -152,8 +155,8 @@
 
 			<plugin>
 				<groupId>cz.cuni.mff.d3s.been</groupId>
-				<artifactId>bpk-plugin</artifactId>
-				<version>3.0.0</version>
+				<artifactId>bpk-maven-plugin</artifactId>
+				<version>${been-maven-plugin.version}</version>
 				<executions>
 					<execution>
 						<goals>
