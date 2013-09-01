@@ -181,4 +181,17 @@
 	</build>
 
 
+	<pluginRepositories>
+		<pluginRepository>
+			<id>everbeen.cz-plugins-snapshots</id>
+			<url>http://everbeen.cz/artifactory/plugins-snapshot-local</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<repositories>
+		<repository>
+			<id>everbeen.cz-snapshots</id>
+			<url>http://everbeen.cz/artifactory/libs-snapshot-local</url>
+		</repository>
+	</repositories>
 </project>
