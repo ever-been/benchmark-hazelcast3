@@ -110,7 +110,7 @@ public class ClientTask extends SkeletalTask {
 
 
 		try {
-			store(result, KIND, GROUP);
+			store(result, GROUP);
 		} catch (DAOException e) {
 			log.error("Cannot persist client's result", e);
 		}

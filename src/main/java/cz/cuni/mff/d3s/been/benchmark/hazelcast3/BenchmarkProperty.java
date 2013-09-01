@@ -23,6 +23,7 @@ import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.PropertyProvider;
  * @author Martin Sixta
  */
 public enum BenchmarkProperty implements PropertyProvider {
+	@Deprecated
 	ENTITY_KIND("entity.kind", "result", true),
 	ENTITY_GROUP("entity.group", "hazelcast3", true),
 

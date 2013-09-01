@@ -1,6 +1,6 @@
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3.common;
 
-import cz.cuni.mff.d3s.been.core.PropertyReader;
+import cz.cuni.mff.d3s.been.util.PropertyReader;
 
 /**
  * @author Martin Sixta

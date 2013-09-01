@@ -16,7 +16,7 @@ import cz.cuni.mff.d3s.been.core.task.TaskExclusivity;
 final class Contexts {
 	private static final String NODE_TEMPLATE = "node";
 	private static final String CLIENT_TEMPLATE = "client";
-	private static final String EVALUATOR_TEMPLATE = "client";
+	private static final String EVALUATOR_TEMPLATE = "evaluator";
 	private static final String BUILDER_TEMPLATE = "builder";
 
 	private static final String CONTEXT_TEMPLATE_RESOURCE = "hazelcast3-template-queue.tcd.xml";

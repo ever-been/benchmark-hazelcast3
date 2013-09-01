@@ -145,7 +145,7 @@ public class NodeTask extends SkeletalTask {
 		log.debug("{} finished in {}s", nodeId, TimeUnit.SECONDS.convert(elapsed, TimeUnit.NANOSECONDS));
 
 
-		store(result, KIND, GROUP);
+		store(result, GROUP);
 
 	}
 

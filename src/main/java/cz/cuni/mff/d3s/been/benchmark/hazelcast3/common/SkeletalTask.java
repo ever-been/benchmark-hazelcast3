@@ -6,6 +6,7 @@ import cz.cuni.mff.d3s.been.core.persistence.EntityID;
 import cz.cuni.mff.d3s.been.persistence.DAOException;
 import cz.cuni.mff.d3s.been.persistence.Query;
 import cz.cuni.mff.d3s.been.persistence.QueryBuilder;
+import cz.cuni.mff.d3s.been.persistence.ResultQueryBuilder;
 import cz.cuni.mff.d3s.been.taskapi.Task;
 import cz.cuni.mff.d3s.been.taskapi.TaskException;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -34,21 +35,18 @@ public abstract class SkeletalTask extends Task {
 
 
 	protected final TaskPropertyReader props;
-	protected final String KIND;
 	protected final String GROUP;
 
 
 	public SkeletalTask() {
 		props = new TaskPropertyReader(createPropertyReader());
-		KIND = props.getString(ENTITY_KIND);
 		GROUP = props.getString(ENTITY_GROUP);
 	}
 
 
 	final protected Path retrieveJar(String name) throws TaskException {
-		EntityID eid = createEntityID();
 
-		Query query = new QueryBuilder().on(eid).with("contextId", getContextId()).with("name", name).fetch();
+		Query query = new ResultQueryBuilder().on(GROUP).with("contextId", getContextId()).with("name", name).fetch();
 
 		try {
 			final Collection<FileResult> fileResults = results.query(query, FileResult.class);
@@ -99,12 +97,6 @@ public abstract class SkeletalTask extends Task {
 			throw new TaskException(String.format("Cannot load %s", file.toString()), e);
 		}
 	}
-
-
-	protected final EntityID createEntityID() {
-		return new EntityID().withKind(props.getString(ENTITY_KIND)).withGroup(props.getString(ENTITY_GROUP));
-	}
-
 
 	protected final void closeHazelcastInstance(HazelcastInstance instance) {
 		if (instance == null) {

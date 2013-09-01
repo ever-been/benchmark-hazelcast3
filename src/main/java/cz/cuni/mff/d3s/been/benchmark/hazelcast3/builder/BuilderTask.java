@@ -131,7 +131,7 @@ public class BuilderTask extends SkeletalTask {
 	private void uploadJar(Path path) throws TaskException {
 		try {
 			Result jarResult = Results.createFromFile(path);
-			store(jarResult, KIND, GROUP);
+			store(jarResult, GROUP);
 		} catch (IOException e) {
 			throw new TaskException("Cannot read built jar file", e);
 		} catch (DAOException e) {
