@@ -1,9 +1,21 @@
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3.node;
 
+import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
+
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.Message;
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.SkeletalTask;
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.result.NodeResult;
@@ -12,21 +24,10 @@ import cz.cuni.mff.d3s.been.mq.MessagingException;
 import cz.cuni.mff.d3s.been.persistence.DAOException;
 import cz.cuni.mff.d3s.been.taskapi.CheckpointController;
 import cz.cuni.mff.d3s.been.taskapi.TaskException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
-
-import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
-
 
 /**
  * The Task which implements the Hazelcast node.
- *
+ * 
  * @author Martin Sixta
  */
 public class NodeTask extends SkeletalTask {
@@ -54,7 +55,7 @@ public class NodeTask extends SkeletalTask {
 
 	@Override
 	public void run(String[] strings) throws TaskException, MessagingException, DAOException {
-		log.debug("Starting node '{}'", getProperty("node.id"));
+		log.debug("Starting node '{}'", getTaskProperty("node.id"));
 
 		Path clientJar = retrieveJar(props.getString(JAR_CLIENT));
 		Path hazelcastJar = retrieveJar(props.getString(JAR_NODE));
@@ -63,7 +64,6 @@ public class NodeTask extends SkeletalTask {
 		loadJar(hazelcastJar);
 
 		runNode();
-
 
 		log.debug("Finishing node");
 
@@ -74,7 +74,6 @@ public class NodeTask extends SkeletalTask {
 		Config cfg = createConfig();
 
 		HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);
-
 
 		IQueue<Message> queue = instance.getQueue(props.getString(HAZELCAST_QUEUE_NAME));
 
@@ -89,12 +88,10 @@ public class NodeTask extends SkeletalTask {
 
 		setAddressCheckPoint(instance);
 
-
 		try (CheckpointController checkpoint = CheckpointController.create()) {
 			checkpoint.latchCountDown(NODE_LATCH.getPropertyName());
 			checkpoint.latchWait(NODE_LATCH.getPropertyName());
 		}
-
 
 		try {
 			while (true) {
@@ -131,7 +128,6 @@ public class NodeTask extends SkeletalTask {
 
 			}
 
-
 		} catch (InterruptedException e) {
 			log.error("No value polled", e);
 		} finally {
@@ -144,11 +140,9 @@ public class NodeTask extends SkeletalTask {
 		NodeResult result = Results.createNodeResult(props, elapsed, msgReceivedCnt);
 		log.debug("{} finished in {}s", nodeId, TimeUnit.SECONDS.convert(elapsed, TimeUnit.NANOSECONDS));
 
-
 		store(result, GROUP);
 
 	}
-
 
 	private Config createConfig() throws TaskException {
 
@@ -169,14 +163,14 @@ public class NodeTask extends SkeletalTask {
 			constructorParameter = CONFIG_DEFAULT_RESOURCE_NAME;
 		}
 
-
 		Config cfg;
 		try {
 			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			final Class<?> classpathConfig = classLoader.loadClass(className);
 			final Constructor<?> constructor = classpathConfig.getConstructor(String.class);
 			cfg = (Config) constructor.newInstance(constructorParameter);
-		} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+		} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException
+				| InstantiationException e) {
 			log.error("Cannot load Hazelcast config", e);
 			throw new TaskException("Cannot load Hazelcast config", e);
 		}
@@ -191,17 +185,15 @@ public class NodeTask extends SkeletalTask {
 	}
 
 	private void setAddressCheckPoint(final HazelcastInstance instance) throws TaskException {
-		String addressProperty = String.format("hazelcast.%s.address", getProperty("node.id"));
+		String addressProperty = String.format("hazelcast.%s.address", getTaskProperty("node.id"));
 		InetSocketAddress inetAddress = instance.getCluster().getLocalMember().getInetSocketAddress();
 		String address = String.format("%s:%s", inetAddress.getHostString(), inetAddress.getPort());
-
 
 		try (CheckpointController checkpoint = CheckpointController.create()) {
 			checkpoint.checkPointSet(addressProperty, address);
 		} catch (MessagingException e) {
 			throw new TaskException("Cannot set " + addressProperty + " check point", e);
 		}
-
 
 	}
 

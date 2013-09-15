@@ -59,9 +59,9 @@ public class BuilderTask extends SkeletalTask {
 
 		final String commit = props.getString(COMMIT_CURRENT);
 
-		final String gitCmdFormat = getProperty("cmd.git");
-		final String mvnCmd = getProperty("cmd.mvn");
-		final String hazelcastDir = getProperty("hazelcast.dir");
+		final String gitCmdFormat = getTaskProperty("cmd.git");
+		final String mvnCmd = getTaskProperty("cmd.mvn");
+		final String hazelcastDir = getTaskProperty("hazelcast.dir");
 
 		log.debug("Going to build commit {}", commit);
 

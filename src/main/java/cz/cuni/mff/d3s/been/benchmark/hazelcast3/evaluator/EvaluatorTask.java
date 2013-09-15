@@ -54,7 +54,7 @@ public class EvaluatorTask extends Evaluator {
 
 		try {
 
-			String benchmarkId = getProperty("evaluator.benchmark.id");
+			String benchmarkId = getTaskProperty("evaluator.benchmark.id");
 
 			if (benchmarkId == null || benchmarkId.isEmpty()) {
 				log.debug("Using current benchmarkId to fetch results");
