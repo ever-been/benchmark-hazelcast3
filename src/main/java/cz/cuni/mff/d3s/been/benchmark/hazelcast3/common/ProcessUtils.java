@@ -2,6 +2,7 @@ package cz.cuni.mff.d3s.been.benchmark.hazelcast3.common;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.PumpStreamHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +48,7 @@ public final class ProcessUtils {
 			stdErrStream = null;
 		}
 
-		//executor.setStreamHandler(new PumpStreamHandler(stdOutStream, stdErrStream));
+		executor.setStreamHandler(new PumpStreamHandler(stdOutStream, stdErrStream));
 		executor.setWorkingDirectory(new File(relativeWorkingDirectory));
 
 		try {

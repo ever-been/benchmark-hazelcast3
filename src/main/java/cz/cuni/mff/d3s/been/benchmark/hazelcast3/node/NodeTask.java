@@ -1,21 +1,9 @@
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3.node;
 
-import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
-
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.Message;
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.SkeletalTask;
 import cz.cuni.mff.d3s.been.benchmark.hazelcast3.result.NodeResult;
@@ -24,10 +12,20 @@ import cz.cuni.mff.d3s.been.mq.MessagingException;
 import cz.cuni.mff.d3s.been.persistence.DAOException;
 import cz.cuni.mff.d3s.been.taskapi.CheckpointController;
 import cz.cuni.mff.d3s.been.taskapi.TaskException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
+
+import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
 
 /**
  * The Task which implements the Hazelcast node.
- * 
+ *
  * @author Martin Sixta
  */
 public class NodeTask extends SkeletalTask {
@@ -71,6 +69,7 @@ public class NodeTask extends SkeletalTask {
 
 	private void runNode() throws TaskException, MessagingException, DAOException {
 
+		System.setProperty("hazelcast.logging.type", "none");
 		Config cfg = createConfig();
 
 		HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);

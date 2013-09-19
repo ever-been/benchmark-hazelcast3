@@ -1,18 +1,15 @@
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3.evaluator;
 
-import java.awt.*;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.imageio.ImageIO;
-
+import cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty;
+import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.TaskPropertyReader;
+import cz.cuni.mff.d3s.been.benchmark.hazelcast3.result.NodeResult;
+import cz.cuni.mff.d3s.been.core.persistence.EntityID;
+import cz.cuni.mff.d3s.been.evaluators.EvaluatorResult;
+import cz.cuni.mff.d3s.been.persistence.DAOException;
+import cz.cuni.mff.d3s.been.persistence.Query;
+import cz.cuni.mff.d3s.been.persistence.QueryBuilder;
+import cz.cuni.mff.d3s.been.taskapi.Evaluator;
+import cz.cuni.mff.d3s.been.taskapi.TaskException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jfree.chart.JFreeChart;
@@ -26,16 +23,17 @@ import org.jfree.data.xy.YIntervalSeriesCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty;
-import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.TaskPropertyReader;
-import cz.cuni.mff.d3s.been.benchmark.hazelcast3.result.NodeResult;
-import cz.cuni.mff.d3s.been.core.persistence.EntityID;
-import cz.cuni.mff.d3s.been.evaluators.EvaluatorResult;
-import cz.cuni.mff.d3s.been.persistence.DAOException;
-import cz.cuni.mff.d3s.been.persistence.Query;
-import cz.cuni.mff.d3s.been.persistence.QueryBuilder;
-import cz.cuni.mff.d3s.been.taskapi.Evaluator;
-import cz.cuni.mff.d3s.been.taskapi.TaskException;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Martin Sixta
@@ -56,7 +54,7 @@ public class EvaluatorTask extends Evaluator {
 
 			String benchmarkId = getTaskProperty("evaluator.benchmark.id");
 
-			if (benchmarkId == null || benchmarkId.isEmpty()) {
+			if (benchmarkId == null || benchmarkId.trim().isEmpty()) {
 				log.debug("Using current benchmarkId to fetch results");
 				benchmarkId = getBenchmarkId();
 			}
@@ -116,7 +114,7 @@ public class EvaluatorTask extends Evaluator {
 	}
 
 	public BufferedImage generateChart(Map<String, List<Double>> data, Map<Integer, String> runToCommit, String yCaption,
-			int width, int height) {
+									   int width, int height) {
 		// create dataset
 		YIntervalSeriesCollection dataset = new YIntervalSeriesCollection();
 		YIntervalSeries s1 = new YIntervalSeries(yCaption);

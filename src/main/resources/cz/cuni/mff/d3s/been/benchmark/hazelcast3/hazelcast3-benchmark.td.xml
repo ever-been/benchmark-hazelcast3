@@ -36,6 +36,8 @@
 		<property name="selector.client" description="Where clients should run"/>
 		<property name="selector.builder" description="Where the builder task should run"/>
 		<property name="selector.evaluator" description="Where the evaluator task should run"/>
+		<property name="evaluator.run.after" description="Run evaluator after each n-th run. 0 meas run as last">0
+		</property>
 
 	</properties>
 

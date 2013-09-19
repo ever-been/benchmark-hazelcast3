@@ -17,15 +17,11 @@
  */
 package cz.cuni.mff.d3s.been.benchmark.hazelcast3;
 
-import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-
+import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.TaskPropertyReader;
+import cz.cuni.mff.d3s.been.benchmarkapi.Benchmark;
+import cz.cuni.mff.d3s.been.benchmarkapi.BenchmarkException;
+import cz.cuni.mff.d3s.been.core.task.TaskContextDescriptor;
+import cz.cuni.mff.d3s.been.core.task.TaskContextState;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -34,21 +30,48 @@ import org.eclipse.egit.github.core.service.RepositoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cz.cuni.mff.d3s.been.benchmark.hazelcast3.common.TaskPropertyReader;
-import cz.cuni.mff.d3s.been.benchmarkapi.Benchmark;
-import cz.cuni.mff.d3s.been.benchmarkapi.BenchmarkException;
-import cz.cuni.mff.d3s.been.core.task.TaskContextDescriptor;
-import cz.cuni.mff.d3s.been.core.task.TaskContextState;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
 
-public class HazelcastBenchmark extends Benchmark {
+import static cz.cuni.mff.d3s.been.benchmark.hazelcast3.BenchmarkProperty.*;
 
+
+/**
+ * The Hazelcast3 benchmark task - main entry.
+ * <p/>
+ * <p/>
+ * Drives the benchmark.
+ */
+public final class HazelcastBenchmark extends Benchmark {
+
+	/**
+	 * Logging
+	 */
 	private static final Logger log = LoggerFactory.getLogger(HazelcastBenchmark.class);
 
+	/**
+	 * Map of commits to benchmark.
+	 */
 	private HashMap<Integer, RepositoryCommit> commitMap;
 
+	/**
+	 * The task's property reader.
+	 */
 	private final TaskPropertyReader props = new TaskPropertyReader(createPropertyReader());
 
+
+	/**
+	 * Current run preserved among runs of the benchmark.
+	 */
 	private static final String STORAGE_CURRENT_RUN = "current.run";
+
+	/**
+	 * Evaluator run - to keep track when to run evaluator.
+	 */
 	private static final String STORAGE_EVALUATOR_RUN = "evaluator.run";
 
 	@Override
@@ -56,24 +79,28 @@ public class HazelcastBenchmark extends Benchmark {
 
 		final int currentRun = storageGetInt(STORAGE_CURRENT_RUN, 0);
 
-		final int runAfter = props.getInteger(EVALUATOR_RUN_AFTER);
+		log.debug("Current run is {}", currentRun);
 
-		boolean runEvaluator = (currentRun > 0) && (currentRun % runAfter == 0);
-		if (runEvaluator) {
-			int lastEvaluatorRun = storageGetInt(STORAGE_EVALUATOR_RUN, 0);
+		// Check whether to run the evaluator task
+		if (isEvaluatorRun(currentRun)) {
+			log.debug("Will run evaluator");
 
-			if (lastEvaluatorRun != currentRun) {
-				return generateEvaluatorContext(currentRun);
-			}
+			// save state
+			storageSet(STORAGE_EVALUATOR_RUN, Integer.toString(currentRun));
+			return Contexts.createEvaluatorContext(props);
+		} else {
+			log.debug("Will not run evaluator");
 		}
 
+
+		// Figure out which commit to benchmark
 		final RepositoryCommit commit;
 
 		try {
 			commit = getCommit(currentRun);
 
 			if (commit == null) {
-				log.info("No more commits");
+				log.debug("No more commits");
 				return null;
 			}
 
@@ -82,32 +109,66 @@ public class HazelcastBenchmark extends Benchmark {
 			return null;
 		}
 
+
+		// Create the context of the benchmark run
 		TaskContextDescriptor contextDescriptor = Contexts.create(currentRun, commit.getSha(), props);
 
+		// save state
 		storageSet(STORAGE_CURRENT_RUN, Integer.toString(currentRun + 1));
 		storageSet("current.commit.sha", commit.getSha());
 
 		log.debug("Generated context for commit {}", commit.getSha());
 
+
+		// submit
 		return contextDescriptor;
 
 	}
 
-	private TaskContextDescriptor generateEvaluatorContext(int run) throws BenchmarkException {
-		storageSet(STORAGE_EVALUATOR_RUN, Integer.toString(run));
-		return Contexts.createEvaluatorContext(props);
-	}
 
 	@Override
 	public void onResubmit() {
-		// nothing
+		log.warn("onResubmit not implemented");
 	}
 
 	@Override
 	public void onTaskContextFinished(String s, TaskContextState taskContextState) {
-		// nothing
+		log.debug("onTaskContextFinished not implemented");
 	}
 
+	/**
+	 * Checks whether to run an evaluator in this iteration.
+	 *
+	 * @param currentRun current run
+	 * @return true if an evaluator should be run, false otherwise
+	 */
+	private boolean isEvaluatorRun(int currentRun) {
+		final int runAfter = props.getInteger(EVALUATOR_RUN_AFTER);
+		int lastEvaluatorRun = storageGetInt(STORAGE_EVALUATOR_RUN, 0);
+
+		if (lastEvaluatorRun == currentRun) {
+			return false;
+		}
+
+		// run as the last context
+		if (runAfter <= 0) {
+			int numberOfRuns = props.getInteger(COMMIT_COUNT);
+
+			return (currentRun == numberOfRuns);
+		}
+
+		return ((currentRun > 0) && (currentRun % runAfter == 0));
+
+	}
+
+
+	/**
+	 * Returns commit for the current run
+	 *
+	 * @param run the current run of the benchmark
+	 * @return commit for the current run
+	 * @throws IOException when a commit cannot be obtained
+	 */
 	private RepositoryCommit getCommit(int run) throws IOException {
 		if (commitMap == null) {
 			commitMap = buildCommits();
@@ -121,6 +182,12 @@ public class HazelcastBenchmark extends Benchmark {
 
 	}
 
+	/**
+	 * Builds list of commits to benchmark
+	 *
+	 * @return run to commit map
+	 * @throws IOException when the map cannot be created
+	 */
 	private HashMap<Integer, RepositoryCommit> buildCommits() throws IOException {
 
 		String urlList = props.getString(COMMIT_LIST_URL);
@@ -136,6 +203,12 @@ public class HazelcastBenchmark extends Benchmark {
 
 	}
 
+	/**
+	 * Builds commits from GitHub.
+	 *
+	 * @return run to commit map
+	 * @throws IOException when the map cannot be created
+	 */
 	private HashMap<Integer, RepositoryCommit> fetchFromGitHub() throws IOException {
 		HashMap<Integer, RepositoryCommit> map = new HashMap<>();
 		int numberOfRuns = props.getInteger(COMMIT_COUNT);
@@ -146,7 +219,7 @@ public class HazelcastBenchmark extends Benchmark {
 		final String gitHubOwner = props.getString(GITHUB_OWNER);
 		final String gitHubRepo = props.getString(GITHUB_REPOSITORY);
 
-		final List<RepositoryCommit> commits = getCommits(oAuth2Token, gitHubOwner, gitHubRepo, branch);
+		final List<RepositoryCommit> commits = getCommitsFromGitHub(oAuth2Token, gitHubOwner, gitHubRepo, branch);
 
 		for (RepositoryCommit commit : commits) {
 			if (numberOfRuns <= 0) {
@@ -159,6 +232,13 @@ public class HazelcastBenchmark extends Benchmark {
 		return map;
 	}
 
+	/**
+	 * Builds commits from a url.
+	 *
+	 * @param url where to fetch the list from
+	 * @return run to commit map
+	 * @throws IOException when the map cannot be created
+	 */
 	private HashMap<Integer, RepositoryCommit> fetchFromUrl(String url) throws IOException {
 
 		int numberOfRuns = props.getInteger(COMMIT_COUNT);
@@ -187,8 +267,18 @@ public class HazelcastBenchmark extends Benchmark {
 
 	}
 
-	private List<RepositoryCommit> getCommits(final String auth, final String owner, final String name,
-			final String branch) throws IOException {
+	/**
+	 * Fetches list of commits form GitHub repository.
+	 *
+	 * @param auth
+	 * @param owner
+	 * @param name
+	 * @param branch
+	 * @return list of commits
+	 * @throws IOException
+	 */
+	private List<RepositoryCommit> getCommitsFromGitHub(final String auth, final String owner, final String name,
+														final String branch) throws IOException {
 		GitHubClient client = new GitHubClient();
 
 		if (auth != null && !auth.isEmpty()) {
